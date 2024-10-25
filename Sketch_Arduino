@@ -1,0 +1,99 @@
+void setup() {
+  pinMode (3,INPUT);
+  pinMode (4,INPUT);
+  pinMode (10,OUTPUT);
+  pinMode (11,OUTPUT);
+  pinMode (12,OUTPUT);
+
+}
+
+void loop() {
+ 
+   //Suma
+     if(digitalRead(3)^digitalRead(4))
+      {  
+      digitalWrite(10, HIGH); 
+      }
+      else
+      {
+      digitalWrite(10, LOW);
+      }
+      if(digitalRead(3)&&digitalRead(4))
+      {  
+      digitalWrite(11, HIGH);
+      }
+      else
+      {
+      digitalWrite(11, LOW);
+      }
+ 
+    //resta
+     if(!digitalRead(3)&&digitalRead(4)){ 
+      digitalWrite(11,HIGH); //signo
+      }
+      else
+      {
+        digitalWrite(11,LOW);
+      }
+      if(digitalRead(3)^digitalRead(4)){
+        digitalWrite(10,HIGH); 
+      }
+      else
+      {
+        digitalWrite(10,LOW);
+      }
+   
+   //AND y Multiplicación
+   if(digitalRead(3)&&digitalRead(4)) 
+      {
+        digitalWrite(10,HIGH);
+      }
+      else
+      {
+        digitalWrite(10,LOW);
+      }
+
+ // Division
+     if (!digitalRead(3) && !digitalRead(4)) {
+        // Estado: 3=0, 4=0
+        digitalWrite(12, HIGH);
+        digitalWrite(11, LOW);
+        digitalWrite(10, LOW);
+      } else if (!digitalRead(3) && digitalRead(4)) {
+        // Estado: 3=0, 4=1
+        digitalWrite(12, LOW);
+        digitalWrite(11, LOW);
+        digitalWrite(10, LOW);
+      } else if (digitalRead(3) && !digitalRead(4)) {
+        // Estado: 3=1, 4=0
+        digitalWrite(12, LOW);
+        digitalWrite(11, HIGH);
+        digitalWrite(10, LOW);
+      } else if (digitalRead(3) && digitalRead(4)) {
+        // Estado: 3=1, 4=1
+        digitalWrite(12, LOW);
+        digitalWrite(11, LOW);
+        digitalWrite(10, HIGH);
+      }
+
+      //OR
+    if(digitalRead(3)||digitalRead(4)) 
+      {
+        digitalWrite(10,HIGH);
+      }
+      else
+      {
+        digitalWrite(10,LOW);
+      }
+
+      //XOR
+      if(digitalRead(3)^digitalRead(4)) 
+      {
+        digitalWrite(10,HIGH);
+      }
+      else
+      {
+        digitalWrite(10,LOW);
+      }
+
+}
