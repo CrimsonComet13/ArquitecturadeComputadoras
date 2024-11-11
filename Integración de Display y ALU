@@ -1,0 +1,44 @@
+const uint8_t DIGITOS[10] = {
+  0b00111111, // 0: Enciende a, b, c, d, e, f
+  0b00000110, // 1: Enciende b, c
+  0b01011011, // 2: Enciende a, b, d, e, g
+  0b01001111, // 3: Enciende a, b, c, d, g
+  0b01100110, // 4: Enciende b, c, f, g
+  0b01101101, // 5: Enciende a, c, d, f, g
+  0b01111101, // 6: Enciende a, c, d, e, f, g
+  0b00000111, // 7: Enciende a, b, c
+  0b01111111, // 8: Enciende todos los segmentos
+  0b01101111  // 9: Enciende a, b, c, d, f, g
+};
+
+int i = 0;
+const int botonPin = 9;  // Pin D9 para el botón
+
+void setup() {
+  // Configura los pines D2 a D8 como salidas para el display de 7 segmentos
+  for (int pin = 2; pin <= 8; pin++) {
+    pinMode(pin, OUTPUT);
+  }
+  pinMode(botonPin, INPUT); // Configura el pin D9 como entrada para el botón
+  mostrarNumero(i); // Muestra el primer número (0) en el display
+}
+
+void loop() {
+  // Lee el estado del botón en el pin D9
+  if (digitalRead(botonPin) == HIGH) {
+    i++;
+    if (i == 10) {
+      i = 0;
+    }
+    mostrarNumero(i);
+    delay(1000); // Espera un segundo para evitar rebotes
+  }
+}
+
+void mostrarNumero(int numero) {
+  uint8_t valor = DIGITOS[numero];
+  for (int j = 0; j < 7; j++) {
+    // Escribe cada bit en los pines D2 a D8
+    digitalWrite(2 + j, (valor >> j) & 0x01);
+  }
+}
