@@ -1,0 +1,45 @@
+#include <EEPROM.h>
+
+const int buttonPin = 2;     // Pin del botón
+const int ledPins[] = {4, 6, 8}; // Pines de los LEDs
+int counter = 0;
+bool buttonState = false;
+bool lastButtonState = false;
+
+void setup() {
+  // Configuración de pines
+  pinMode(buttonPin, INPUT_PULLUP);
+  for (int i = 0; i < 3; i++) {
+    pinMode(ledPins[i], OUTPUT);
+  }
+  
+  // Leer el valor inicial de la EEPROM
+  counter = EEPROM.read(0);
+  mostrarEnBinario(counter);
+}
+
+void loop() {
+  buttonState = digitalRead(buttonPin);
+
+  // Detectar si el botón ha sido presionado
+  if (buttonState == LOW && lastButtonState == HIGH) {
+    counter++;
+    
+    // Guardar en EEPROM
+    EEPROM.write(0, counter);
+
+    // Mostrar en LEDs
+    mostrarEnBinario(counter);
+    
+    // Espera para evitar rebotes
+    delay(200);
+  }
+
+  lastButtonState = buttonState;
+}
+
+void mostrarEnBinario(int numero) {
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(ledPins[i], (numero >> i) & 0x01);
+  }
+}
