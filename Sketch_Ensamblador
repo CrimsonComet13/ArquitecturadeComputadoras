@@ -1,0 +1,183 @@
+// Definir los pines de los segmentos del display de 7 segmentos
+int segmentPins[] = {2, 3, 4, 5, 6, 7, 8};  // A-G
+
+// Mapeo de los números del 0 al 9 en el display de 7 segmentos (cátodo común)
+byte numToSegments[] = {
+  B00111111,  // 0
+  B00000110,  // 1
+  B01011011,  // 2
+  B01001111,  // 3
+  B01100110,  // 4
+  B01101101,  // 5
+  B01111101,  // 6
+  B00000111,  // 7
+  B01111111,  // 8
+  B01101111   // 9
+};
+
+char data[26];  // Arreglo para almacenar los datos recibidos
+String operation = "";  // Variable para almacenar la operación seleccionada
+
+void setup() { 
+  Serial.begin(9600);
+  Serial.println("En línea, esperando instrucciones...");
+  
+  // Inicializar los pines de los segmentos como salidas
+  for (int i = 0; i < 7; i++) {
+    pinMode(segmentPins[i], OUTPUT);
+  }
+}
+
+void loop() {
+  // Si aún no se ha elegido una operación, se solicita
+  if (operation == "") {
+    Serial.println("Por favor, elija una operación:");
+    Serial.println("sum: Suma");
+    Serial.println("resta: Resta");
+    Serial.println("mul: Multiplicación");
+    Serial.println("div: División");
+
+    while (Serial.available() == 0) {
+      // Espera a que el usuario ingrese el comando
+    }
+
+    int number_of_bytes_received = Serial.readBytesUntil('\n', data, 25);  // Lee hasta encontrar un salto de línea
+    data[number_of_bytes_received] = '\0';  // Añadir el terminador nulo al final del arreglo
+
+    // Limpiar los espacios en blanco
+    String command = String(data);
+    command.trim();
+
+    // Mostrar el comando recibido
+    Serial.print("Comando recibido: ");
+    Serial.println(command);
+
+    // Verificar si el comando es válido y asignarlo a la variable de operación
+    if (command == "sum") {
+      operation = "sum";
+      Serial.println("Suma seleccionada");
+    }
+    else if (command == "resta") {
+      operation = "resta";
+      Serial.println("Resta seleccionada");
+    }
+    else if (command == "mul") {
+      operation = "mul";
+      Serial.println("Multiplicación seleccionada");
+    }
+    else if (command == "div") {
+      operation = "div";
+      Serial.println("División seleccionada");
+    } 
+    else {
+      Serial.println("Comando no reconocido.");
+    }
+  }
+  else {
+    // Una vez seleccionada la operación, pedir los operandos y realizar la operación
+    performOperation(operation);
+
+    // Limpiar la operación después de realizarla para permitir otra operación
+    operation = "";
+  }
+}
+
+void performOperation(String operation) {
+  char bin1[10], bin2[10];
+  int num1, num2, result;
+
+  // Pedir los operandos binarios
+  Serial.println("Introduce el primer número binario:");
+  readBinary(bin1);
+
+  Serial.println("Introduce el segundo número binario:");
+  readBinary(bin2);
+
+  // Convertir binarios a decimal
+  num1 = binToDecimal(bin1);
+  num2 = binToDecimal(bin2);
+
+  // Verificar que los números estén en el rango de 0 a 9
+  if (num1 < 0 || num1 > 9 || num2 < 0 || num2 > 9) {
+    Serial.println("Error: Los números deben estar en el rango de 0 a 9.");
+    return;
+  }
+
+  // Realizar la operación según el tipo seleccionado
+  if (operation == "sum") {
+    result = num1 + num2;
+    Serial.print("Resultado de la suma: ");
+  } 
+  else if (operation == "resta") {
+    result = num1 - num2;
+    Serial.print("Resultado de la resta: ");
+  }
+  else if (operation == "mul") {
+    result = num1 * num2;
+    Serial.print("Resultado de la multiplicación: ");
+  }
+  else if (operation == "div") {
+    if (num2 == 0) {
+      Serial.println("Error: No se puede dividir entre cero.");
+      return;
+    }
+    result = num1 / num2;
+    Serial.print("Resultado de la división: ");
+  }
+
+  // Verificar que el resultado esté en el rango de 0 a 9
+  if (result < 0 || result > 9) {
+    Serial.println("Error: El resultado está fuera del rango permitido (0-9).");
+  } else {
+    // Mostrar el resultado en el display de 7 segmentos
+    displayNumber(result);
+
+    // Mostrar el resultado en binario en el Serial Monitor
+    String binaryResult = decToBin(result);
+    Serial.print(" (binario): ");
+    Serial.println(binaryResult);
+  }
+}
+
+// Función para leer un número binario desde el puerto serial
+void readBinary(char* bin) {
+  int i = 0;
+  while (true) {
+    if (Serial.available() > 0) {
+      char c = Serial.read();
+      if (c == '\n' || c == '\r') break;  // Terminar al encontrar nueva línea o retorno de carro
+      if (c == '0' || c == '1') {  // Solo aceptar 0 o 1
+        bin[i] = c;
+        i++;
+      }
+    }
+  }
+  bin[i] = '\0';  // Terminar la cadena
+}
+
+// Función para convertir un número binario a decimal
+int binToDecimal(char* bin) {
+  int decimal = 0;
+  for (int i = 0; bin[i] != '\0'; i++) {
+    decimal = decimal * 2 + (bin[i] - '0');  // Convertir cada bit a decimal
+  }
+  return decimal;
+}
+
+// Función para convertir un número decimal a binario (en formato de cadena)
+String decToBin(int num) {
+  String bin = "";
+  for (int i = 3; i >= 0; i--) {
+    bin += ((num >> i) & 1) ? '1' : '0';
+  }
+  return bin;
+}
+
+// Función para mostrar un número en el display de 7 segmentos
+void displayNumber(int num) {
+  byte segments = numToSegments[num];  // Obtener los segmentos correspondientes al número
+
+  for (int i = 0; i < 7; i++) {
+    digitalWrite(segmentPins[i], bitRead(segments, i));  // Controlar cada segmento
+  }
+}
