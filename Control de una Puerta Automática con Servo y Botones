@@ -1,0 +1,54 @@
+#include <Servo.h>
+
+// Definición de pines
+const int button1Pin = 2; // Botón para activar el servo
+const int button2Pin = 3; // Botón para desactivar el servo
+const int ledActivePin = 4; // LED para indicar posición activada
+const int ledInactivePin = 5; // LED para indicar posición inicial
+const int servoPin = 6; // Pin del servo
+
+// Estado inicial del sistema
+int button1State = 0;
+int button2State = 0;
+
+Servo servoMotor; // Objeto para controlar el servo
+
+void setup() {
+  // Configurar pines de botones como entrada
+  pinMode(button1Pin, INPUT_PULLUP); 
+  pinMode(button2Pin, INPUT_PULLUP);
+
+  // Configurar pines de LEDs como salida
+  pinMode(ledActivePin, OUTPUT);
+  pinMode(ledInactivePin, OUTPUT);
+
+  // Inicializar LEDs
+  digitalWrite(ledActivePin, LOW);
+  digitalWrite(ledInactivePin, HIGH);
+
+  // Inicializar el servo en la posición inicial
+  servoMotor.attach(servoPin);
+  servoMotor.write(0); // Posición inicial
+}
+
+void loop() {
+  // Leer el estado de los botones
+  button1State = digitalRead(button1Pin);
+  button2State = digitalRead(button2Pin);
+
+  // Si se presiona el botón 1, mover el servo a 90 grados
+  if (button1State == LOW) {
+    servoMotor.write(90); // Posición activada
+    digitalWrite(ledActivePin, HIGH); // Encender LED activado
+    digitalWrite(ledInactivePin, LOW); // Apagar LED inactivo
+    delay(200); // Antirrebote
+  }
+
+  // Si se presiona el botón 2, mover el servo a 0 grados
+  if (button2State == LOW) {
+    servoMotor.write(0); // Posición inicial
+    digitalWrite(ledActivePin, LOW); // Apagar LED activado
+    digitalWrite(ledInactivePin, HIGH); // Encender LED inactivo
+    delay(200); // Antirrebote
+  }
+}
