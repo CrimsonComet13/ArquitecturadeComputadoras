@@ -1,0 +1,28 @@
+const int LED = 3;  // LED conectado al pin digital 3 (PWM)
+const int potenciometro = A0; // Sensor/Potenciómetro conectado al pin A0
+int intensidadActual = 0; // Intensidad de brillo actual
+int intensidadDeseada = 0; // Intensidad deseada
+const int paso = 5; // Tamaño del paso para el cambio gradual
+
+void setup() {
+  pinMode(LED, OUTPUT); // Configurar el pin del LED como salida
+}
+
+void loop() {
+  intensidadDeseada = analogRead(potenciometro) / 4; // Leer y mapear valor
+  
+  // Suavizar la transición entre la intensidad actual y la deseada
+  if (intensidadActual < intensidadDeseada) {
+    intensidadActual += paso;
+    if (intensidadActual > intensidadDeseada) {
+      intensidadActual = intensidadDeseada;
+    }
+  } else if (intensidadActual > intensidadDeseada) {
+    intensidadActual -= paso;
+    if (intensidadActual < intensidadDeseada) {
+      intensidadActual = intensidadDeseada;
+    }
+  }
+  analogWrite(LED, intensidadActual); // Ajustar brillo del LED
+  delay(10);
+}
